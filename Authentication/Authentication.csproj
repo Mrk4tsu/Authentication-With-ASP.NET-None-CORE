@@ -142,6 +142,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\BaseDAO.cs" />
     <Compile Include="Services\UserDAO.cs" />
+    <Compile Include="Utilities\EmailCommon.cs" />
+    <Compile Include="Utilities\SimpleHash.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
   </ItemGroup>

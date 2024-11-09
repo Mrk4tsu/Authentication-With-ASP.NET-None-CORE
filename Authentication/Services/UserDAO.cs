@@ -1,4 +1,5 @@
 ﻿using Authentication.Models;
+using Authentication.Utilities;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace Authentication.Services
             {
                 if (!user.Status)
                     return -2;//Tài khoản đang bị khóa
-                if (user.Password != password)
+                if (SimpleHash.GetInstance().Hash(password) != user.Password)
                     return -3;//Mật khẩu không chính xác
                 return 1;
             }
