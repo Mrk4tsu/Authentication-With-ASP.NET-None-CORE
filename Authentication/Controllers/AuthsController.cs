@@ -1,8 +1,11 @@
 ﻿using Authentication.Models;
 using Authentication.Services;
 using Authentication.ViewModels;
+using System;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace Authentication.Controllers
 {
@@ -22,7 +25,7 @@ namespace Authentication.Controllers
             {
                 var user = new Users
                 {
-                    Username = model.Username,
+                    Username = model.Username.ToLowerInvariant(),
                     Password = model.Password,
                     FullName = model.FullName,
                     Email = model.Email,
@@ -44,6 +47,54 @@ namespace Authentication.Controllers
 
             }
             return View(model);
+        }
+        [HttpGet]
+        public ActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = userDAO.Login(model.Username, model.Password, model.RememberMe);
+                switch (result)
+                {
+                    case 1:
+                        //Nếu người dùng tick ghi nhớ đăng nhập thì sẽ lưu cookies 30 ngày, ngx lại là 3 phút
+                        var expirationTIme = model.RememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddMinutes(3);
+                        var authTicket = new FormsAuthenticationTicket(
+                                version: 1,
+                                name: model.Username,
+                                issueDate: DateTime.Now,
+                                expiration: expirationTIme,
+                                isPersistent: model.RememberMe,
+                                userData: model.Username
+                            );
+                        string enCryptedTicket = FormsAuthentication.Encrypt(authTicket);
+                        var authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, enCryptedTicket);
+                        Response.Cookies.Add(authCookie);
+
+                        return RedirectToAction("Index", "Home");
+                    case -2:
+                        ModelState.AddModelError("", "Tài khoản đang bị khóa");
+                        break;
+                    case -3:
+                        ModelState.AddModelError("", "Mật khẩu không chính xác");
+                        break;
+                    default:
+                        ModelState.AddModelError("", "Tài khoản không tồn tại");
+                        break;
+                }
+            }
+            return View(model);
+        }
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("Login", "Auths");
         }
     }
 }

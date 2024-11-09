@@ -16,7 +16,7 @@ namespace Authentication.Services
         #region[Get User]
         public Users GetUserReadOnly(string username)
         {
-            var model = db.Users.AsNoTracking().SingleOrDefault(u => Lower(u.Username) == Lower(username));
+            var model = db.Users.AsNoTracking().SingleOrDefault(u => u.Username == username);
             return model;
         }
         public async Task<Users> GetUsersAsync(int id)
@@ -25,6 +25,20 @@ namespace Authentication.Services
             return model;
         }
         #endregion
+        public int Login(string username, string password, bool remember)
+        {
+            var user = GetUserReadOnly(username);
+            if (user != null)
+            {
+                if (!user.Status)
+                    return -2;//Tài khoản đang bị khóa
+                if (user.Password != password)
+                    return -3;//Mật khẩu không chính xác
+                return 1;
+            }
+            //Không có tài khoản trong databse
+            return -1;
+        }
         public async Task<int> InsertUserAsync(Users model)
         {
             if (await IsExistingAccount(model.Username))

@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
 namespace Authentication.Services
 {
     public abstract class BaseDAO
     {
-        protected string Lower(string value)
+        //Bỏ so sánh chuỗi bằng Lower
+        protected bool CompareString(string strA, string strB)
         {
-            return value = value.ToLowerInvariant();
+            return string.Equals(strA, strB, StringComparison.CurrentCultureIgnoreCase);
         }       
         protected string GenerateUserCODE()
         {
