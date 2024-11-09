@@ -1,50 +1,83 @@
 ﻿@model Authentication.ViewModels.LoginViewModel
 
 @{
+    Layout = null;
     ViewBag.Title = "Login";
+
+
 }
 
-<h2>Login</h2>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Đăng Nhập</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .password-container {
+            position: relative;
+        }
 
-
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>LoginViewModel</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.Username, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Username, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.RememberMe, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <div class="checkbox">
-                    @Html.EditorFor(model => model.RememberMe)
-                    @Html.ValidationMessageFor(model => model.RememberMe, "", new { @class = "text-danger" })
+        .password-toggle {
+            position: absolute;
+            right: 0;
+            top: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #007bff;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card p-4 shadow" style="max-width: 400px; width: 100%;">
+            <h3 class="text-center mb-4">Đăng Nhập</h3>
+            @using (Html.BeginForm("Login", "Auths"))
+            {
+                @Html.AntiForgeryToken()
+                <p class="text-danger">@ViewBag.Message</p>
+                <div class="mb-3">
+                    @Html.LabelFor(model => model.Username, htmlAttributes: new { @class = "form-label" })
+                    @Html.EditorFor(model => model.Username, new { htmlAttributes = new { @class = "form-control", @placeholder = "Nhập username" } })
+                    @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
                 </div>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Login" class="btn btn-default" />
-            </div>
+                <div class="mb-3 password-container">
+                    @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "form-label" })
+                    @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control", @placeholder = "Nhập mật khẩu", @type = "password", @id = "password" } })
+                    <span class="password-toggle" id="togglePassword">Hiển thị</span>
+                </div>
+                <div class="mb-3 form-check">
+                    @Html.EditorFor(model => model.RememberMe, new { htmlAttributes = new { @class = "form-check-input", @type = "checkbox" } })
+                    @*<input type="checkbox" class="form-check-input" id="rememberMe">*@
+                    <label class="form-check-label" for="RememberMe">Ghi nhớ đăng nhập</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Đăng Nhập</button>
+            }
+            <hr>
+            <p class="text-center mt-3">Chưa có tài khoản? <a href="#">Đăng ký</a></p>
         </div>
     </div>
-}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // JavaScript để xử lý sự kiện bật/tắt mật khẩu
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function () {
+            // Kiểm tra trạng thái hiện/ẩn của mật khẩu
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+
+            // Thay đổi văn bản của nút "Hiện"/"Ẩn"
+            if (type === 'password') {
+                togglePassword.textContent = 'Hiển thị';
+            } else {
+                togglePassword.textContent = 'Ẩn đi';
+            }
+        });
+    </script>
+</body>
+</html>
