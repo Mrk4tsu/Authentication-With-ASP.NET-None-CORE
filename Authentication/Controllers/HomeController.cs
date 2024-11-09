@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace Authentication.Controllers
 {
-    public class HomeController : BaseController
+    public class HomeController : BaseController 
     {
         public ActionResult Index()
         {

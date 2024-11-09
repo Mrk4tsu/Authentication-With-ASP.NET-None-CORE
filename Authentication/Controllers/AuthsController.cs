@@ -62,6 +62,7 @@ namespace Authentication.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginViewModel model)
         {
+            string message = "";
             if (ModelState.IsValid)
             {
                 var result = userDAO.Login(model.Username, model.Password, model.RememberMe);
@@ -85,15 +86,19 @@ namespace Authentication.Controllers
                         return RedirectToAction("Index", "Home");
                     case -2:
                         ModelState.AddModelError("", "Tài khoản đang bị khóa");
+                        message = "Tài khoản đang bị khóa";
                         break;
                     case -3:
                         ModelState.AddModelError("", "Mật khẩu không chính xác");
+                        message = "Mật khẩu không chính xác";
                         break;
                     default:
                         ModelState.AddModelError("", "Tài khoản không tồn tại");
+                        message = "Tài khoản không tồn tại";
                         break;
                 }
             }
+            ViewBag.Message = message;
             return View(model);
         }
         #endregion
