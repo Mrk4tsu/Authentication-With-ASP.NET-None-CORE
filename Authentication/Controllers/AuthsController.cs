@@ -1,5 +1,6 @@
 ﻿using Authentication.Models;
 using Authentication.Services;
+using Authentication.Utilities;
 using Authentication.ViewModels;
 using System;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace Authentication.Controllers
     public class AuthsController : Controller
     {
         private UserDAO userDAO = new UserDAO();
+        private SimpleHash simpleHash = SimpleHash.GetInstance();
+        #region[Đăng ký]
         [HttpGet]
         public ActionResult Register()
         {
@@ -26,7 +29,7 @@ namespace Authentication.Controllers
                 var user = new Users
                 {
                     Username = model.Username.ToLowerInvariant(),
-                    Password = model.Password,
+                    Password = simpleHash.Hash(model.Password),
                     FullName = model.FullName,
                     Email = model.Email,
                     Phone = model.Phone
@@ -48,6 +51,8 @@ namespace Authentication.Controllers
             }
             return View(model);
         }
+        #endregion
+        #region[Đăng nhập]
         [HttpGet]
         public ActionResult Login()
         {
@@ -91,6 +96,7 @@ namespace Authentication.Controllers
             }
             return View(model);
         }
+        #endregion
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();
