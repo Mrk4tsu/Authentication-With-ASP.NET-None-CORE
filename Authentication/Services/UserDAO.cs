@@ -22,6 +22,11 @@ namespace Authentication.Services
             var model = db.Users.AsNoTracking().SingleOrDefault(u => u.Username == username);
             return model;
         }
+        public async Task<Users> GetUserByCodeReadOnly(string code)
+        {
+            var model = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserCODE == code);
+            return model;
+        }
         public async Task<Users> GetUsersAsync(int id)
         {
             var model = await db.Users.SingleOrDefaultAsync(u => u.Id == id);
@@ -52,7 +57,6 @@ namespace Authentication.Services
             {
                 return -2;
             }
-            model.UserCODE = GenerateUserCODE();
             model.CreatedDate = DateTime.UtcNow;
             model.ModifiedDate = DateTime.UtcNow;
             model.Status = true;
@@ -60,12 +64,6 @@ namespace Authentication.Services
             db.Users.Add(model);
             await db.SaveChangesAsync().ConfigureAwait(false);
 
-            var verifyUrl = $"/active/{simpleHash.Hash(model.Username)}";
-            var link = HttpContext.Current.Request.Url.AbsoluteUri.Replace(HttpContext.Current.Request.Url.PathAndQuery, verifyUrl);
-
-            string subject = $"Xác minh địa chỉ Email tài khoản!";
-            string body = EmailCommon.GetInstance().BodyWelcomeEmail(link, model.UserCODE, model.Username);
-            await EmailCommon.GetInstance().SendEmail(model, subject, body);
             return model.Id;
         }
         public async Task VerifyEmail(Users users)
