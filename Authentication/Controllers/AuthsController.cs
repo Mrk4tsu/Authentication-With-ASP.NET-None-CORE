@@ -1,5 +1,4 @@
-﻿using Antlr.Runtime.Misc;
-using Authentication.Models;
+﻿using Authentication.Models;
 using Authentication.Services;
 using Authentication.Utilities;
 using Authentication.ViewModels;
@@ -21,27 +20,19 @@ namespace Authentication.Controllers
         {
             return View();
         }
-        /*
-         Xử lý logic:
-            - Mail xác nhận đăng ký là mail duy nhất nhận được mã chính xác của người dùng
-            - Mọi thông tin sau đó sẽ mã hóa, người dùng và chủ web cũng không thể biết được trừ khi có email
-            - Suy ra email chứa mã xác nhận là quan trọng nhất
-         */
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                string userCode = userDAO.GenerateUserCODE();
                 var user = new Users
                 {
                     Username = model.Username.ToLowerInvariant(),
                     Password = simpleHash.Hash(model.Password),
                     FullName = model.FullName,
                     Email = model.Email,
-                    Phone = model.Phone,
-                    UserCODE = simpleHash.Hash(userCode),
+                    Phone = model.Phone
                 };
                 var result = await userDAO.InsertUserAsync(user);
 
@@ -54,12 +45,6 @@ namespace Authentication.Controllers
                         ModelState.AddModelError("", "Email đã tồn tại");
                         break;
                     default:
-                        var verifyUrl = Url.Action("VerifyEmail", "Auths", new { code = user.UserCODE }, protocol: Request.Url.Scheme);
-
-
-                        string subject = $"[Welcome] Xác minh địa chỉ Email tài khoản!";
-                        string body = EmailCommon.GetInstance().BodyWelcomeEmail(verifyUrl, userCode, user.FullName);
-                        await EmailCommon.GetInstance().SendEmail(user, subject, body);
                         return RedirectToAction("Login", "Auths");
                 }
 
@@ -117,23 +102,6 @@ namespace Authentication.Controllers
             return View(model);
         }
         #endregion
-        public async Task<ActionResult> VerifyEmail(string code)
-        {
-            bool status = false;
-            var user = await userDAO.GetUserByCodeReadOnly(code);
-            if (user != null)
-            {
-                await userDAO.VerifyEmail(user);
-                status = true;
-            }
-            else
-            {
-                ViewBag.Message = "Yêu cầu không hợp lệ!";
-            }
-
-            ViewBag.Status = status;
-            return View();
-        }
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();

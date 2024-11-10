@@ -27,7 +27,7 @@ namespace Authentication.Utilities
             var fromEmail = new MailAddress("thang.ndu.63cntt@ntu.edu.vn", "MrKatsu");
             var toEmail = new MailAddress(users.Email);
 
-            var fromEmailPassword = "Thangkatsu@2104";
+            var fromEmailPassword = "******";
             var smtp = new SmtpClient
             {
                 Host = "smtp.gmail.com",
@@ -46,25 +46,6 @@ namespace Authentication.Utilities
             {
                 await smtp.SendMailAsync(message);
             }
-        }
-        public string BodyWelcomeEmail(string url, string code, string user)
-        {
-            string logoUrl = "https://raw.githubusercontent.com/Mrk4tsu/Mrk4tsu/refs/heads/main/assets/MRKATSU.png";
-            string html = $@"<div style=""display:flex; justify-content:center"">
-                                <div style=""width: fit-content; border-radius:15px; font-family: 'Montserrat Medium', sans-serif; background: rgba(39, 61, 82); text-align: center; padding: 10px 40px; "">
-                                    <div style="" margin: 20px 0px;"">
-                                        <img style=""width: 250px;"" src='{logoUrl}' />
-                                        <p style=""font-size: 30px; color: #fff;"">Chào mừng đến với <span style=""color: #28a745; font-weight: bold;"">MrKatsu</span></p>                                     
-                                        <p style=""font-size: 16px; color: #fff;"">Xin chào {user}, đây là thư dùng 1 lần để thực hiện xác minh tài khoản. Vui lòng lưu trữ mã xác thực người dùng, mọi quyền sử dụng tài khoản sẽ phụ thuộc vào <b>MÃ XÁC THỰC NGƯỜI DÙNG</b> này.</p>
-                                        <p style=""font-size: 30px; color: #fff;"">Mã xác thực người dùng: </p>
-                                        <a style=""background: rgba(39, 101, 112) ;font-size:13px; color: #fff; padding: 10px 15px; margin-bottom:15px; border-radius: 15px; text-decoration: none; "">{code}</a>
-                                        <p style=""color:orangered; font-style:italic; margin-top: 15px;"">Vui lòng không cung cấp mã tránh mất tài khoản!</p>
-                                        <a style=""background: #28a745; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; "" href='{url}'>Xác minh email</a>
-                                        
-                                    </div>
-                                </div>
-                            </div>";
-            return html;
         }
     }
 }
