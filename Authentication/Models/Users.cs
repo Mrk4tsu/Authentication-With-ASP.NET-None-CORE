@@ -47,7 +47,8 @@ namespace Authentication.Models
         public string UserCODE { get; set; }
 
         public bool Status { get; set; }
-        public bool IsVerifiedEmail { get; set; }
+
+        public bool IsVerifedEmail { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DeviceVerificationToken> DeviceVerificationToken { get; set; }

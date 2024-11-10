@@ -56,7 +56,7 @@ namespace Authentication.Services
             model.CreatedDate = DateTime.UtcNow;
             model.ModifiedDate = DateTime.UtcNow;
             model.Status = true;
-            model.IsVerifiedEmail = false;
+            model.IsVerifedEmail = false;
             db.Users.Add(model);
             await db.SaveChangesAsync().ConfigureAwait(false);
 
@@ -70,7 +70,7 @@ namespace Authentication.Services
         }
         public async Task VerifyEmail(Users users)
         {
-            users.IsVerifiedEmail = true;
+            users.IsVerifedEmail = true;
 
             db.Entry(users).State = EntityState.Modified;
             await db.SaveChangesAsync().ConfigureAwait(false);
