@@ -4,11 +4,13 @@ using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Authentication.Services
 {
     public class UserDAO : BaseDAO
     {
+        private SimpleHash simpleHash = SimpleHash.GetInstance();
         private AuthsDbContext db;
         public UserDAO()
         {
@@ -54,10 +56,26 @@ namespace Authentication.Services
             model.CreatedDate = DateTime.UtcNow;
             model.ModifiedDate = DateTime.UtcNow;
             model.Status = true;
+            model.IsVerifiedEmail = false;
             db.Users.Add(model);
             await db.SaveChangesAsync().ConfigureAwait(false);
+
+            var verifyUrl = $"/active/{simpleHash.Hash(model.Username)}";
+            var link = HttpContext.Current.Request.Url.AbsoluteUri.Replace(HttpContext.Current.Request.Url.PathAndQuery, verifyUrl);
+
+            string subject = $"Xác minh địa chỉ Email tài khoản!";
+            string body = EmailCommon.GetInstance().BodyWelcomeEmail(link, model.UserCODE, model.Username);
+            await EmailCommon.GetInstance().SendEmail(model, subject, body);
             return model.Id;
         }
+        public async Task VerifyEmail(Users users)
+        {
+            users.IsVerifiedEmail = true;
+
+            db.Entry(users).State = EntityState.Modified;
+            await db.SaveChangesAsync().ConfigureAwait(false);
+        }
+        #region[Check]
         public async Task<bool> IsExistingAccount(string username)
         {
             return await db.Users
@@ -74,5 +92,6 @@ namespace Authentication.Services
                 //.Select(a => a.Id)
                 .AnyAsync();
         }
+        #endregion
     }
 }

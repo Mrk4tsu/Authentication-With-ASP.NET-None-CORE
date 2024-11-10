@@ -1,4 +1,5 @@
-﻿using Authentication.Models;
+﻿using Antlr.Runtime.Misc;
+using Authentication.Models;
 using Authentication.Services;
 using Authentication.Utilities;
 using Authentication.ViewModels;
@@ -44,7 +45,7 @@ namespace Authentication.Controllers
                     case -2:
                         ModelState.AddModelError("", "Email đã tồn tại");
                         break;
-                    default:
+                    default:                        
                         return RedirectToAction("Login", "Auths");
                 }
 
@@ -102,6 +103,20 @@ namespace Authentication.Controllers
             return View(model);
         }
         #endregion
+        public async Task<ActionResult> VerifyEmail(string username)
+        {
+            bool status = false;
+            var user = userDAO.GetUserReadOnly(username);
+            if (user != null)
+            {
+                await userDAO.VerifyEmail(user);
+            }
+            else ViewBag.Message = "Yêu cầu không hợp lệ!";
+
+            username = simpleHash.Hash(user.Username);
+            ViewBag.Status = status;
+            return View();
+        }
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();
