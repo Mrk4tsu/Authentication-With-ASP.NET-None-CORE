@@ -76,12 +76,12 @@ namespace Authentication.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginViewModel model)
+        public async Task<ActionResult> Login(LoginViewModel model)
         {
             string message = "";
             if (ModelState.IsValid)
             {
-                var result = userDAO.Login(model.Username, model.Password, model.RememberMe);
+                var result = await userDAO.Login(model.Username, model.Password, model.RememberMe);
                 switch (result)
                 {
                     case 1:

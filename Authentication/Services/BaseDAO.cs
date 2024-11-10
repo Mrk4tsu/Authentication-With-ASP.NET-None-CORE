@@ -23,5 +23,12 @@ namespace Authentication.Services
             return new string(Enumerable.Repeat(chars, length)
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+        protected string RandomNumber(int length)
+        {
+            const string chars = "0123456789";
+            Random random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
     }
 }

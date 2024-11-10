@@ -110,6 +110,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="UAParser, Version=3.1.47.0, Culture=neutral, PublicKeyToken=f7377bf021646069, processorArchitecture=MSIL">
+      <HintPath>..\packages\UAParser.3.1.47\lib\net45\UAParser.dll</HintPath>
+    </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
@@ -144,6 +147,7 @@
     <Compile Include="Services\UserDAO.cs" />
     <Compile Include="Utilities\EmailCommon.cs" />
     <Compile Include="Utilities\SimpleHash.cs" />
+    <Compile Include="Services\UserDeviceDAO.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
   </ItemGroup>
