@@ -12,7 +12,15 @@ namespace Authentication
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-
+            routes.MapRoute(
+                name: "VerifyEmail",
+                url: "active/{code}",
+                defaults: new
+                {
+                    controller = "Auths",
+                    action = "VerifyEmail",
+                    code = UrlParameter.Optional
+            });
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

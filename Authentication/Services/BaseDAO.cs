@@ -10,7 +10,7 @@ namespace Authentication.Services
         {
             return string.Equals(strA, strB, StringComparison.CurrentCultureIgnoreCase);
         }       
-        protected string GenerateUserCODE()
+        public string GenerateUserCODE()
         {
             long ticks = DateTime.Now.Ticks;
             string result = $"{RandomString(2)}{ticks}";

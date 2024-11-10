@@ -204,6 +204,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Auths\Register.cshtml" />
     <Content Include="Views\Auths\Login.cshtml" />
+    <Content Include="Views\Auths\VerifyEmail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Base\" />

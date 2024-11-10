@@ -1,0 +1,23 @@
+﻿
+@{
+    ViewBag.Title = "VerifyEmail";
+}
+
+<div class="row d-flex justify-content-center align-content-center">
+    <section class="col-md-10 py-3 mx-5">
+        <h3>Xác minh tài khoản</h3>
+        @if (ViewBag.Status != null && Convert.ToBoolean(ViewBag.Status))
+        {
+            <div class="alert alert-success">
+                <strong>Succesfull! </strong> Tài khoản của bạn đã được kích hoạt thành công. Quay về <a href="/" class="text-info">trang chủ</a> .
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <strong>Error!</strong> @ViewBag.Message
+            </div>
+        }
+    </section>
+</div>
+

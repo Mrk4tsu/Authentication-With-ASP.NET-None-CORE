@@ -4,11 +4,13 @@ using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Authentication.Services
 {
     public class UserDAO : BaseDAO
     {
+        private SimpleHash simpleHash = SimpleHash.GetInstance();
         private AuthsDbContext db;
         public UserDAO()
         {
@@ -18,6 +20,11 @@ namespace Authentication.Services
         public Users GetUserReadOnly(string username)
         {
             var model = db.Users.AsNoTracking().SingleOrDefault(u => u.Username == username);
+            return model;
+        }
+        public async Task<Users> GetUserByCodeReadOnly(string code)
+        {
+            var model = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.UserCODE == code);
             return model;
         }
         public async Task<Users> GetUsersAsync(int id)
@@ -50,14 +57,23 @@ namespace Authentication.Services
             {
                 return -2;
             }
-            model.UserCODE = GenerateUserCODE();
             model.CreatedDate = DateTime.UtcNow;
             model.ModifiedDate = DateTime.UtcNow;
             model.Status = true;
+            model.IsVerifedEmail = false;
             db.Users.Add(model);
             await db.SaveChangesAsync().ConfigureAwait(false);
+
             return model.Id;
         }
+        public async Task VerifyEmail(Users users)
+        {
+            users.IsVerifedEmail = true;
+
+            db.Entry(users).State = EntityState.Modified;
+            await db.SaveChangesAsync().ConfigureAwait(false);
+        }
+        #region[Check]
         public async Task<bool> IsExistingAccount(string username)
         {
             return await db.Users
@@ -74,5 +90,6 @@ namespace Authentication.Services
                 //.Select(a => a.Id)
                 .AnyAsync();
         }
+        #endregion
     }
 }
