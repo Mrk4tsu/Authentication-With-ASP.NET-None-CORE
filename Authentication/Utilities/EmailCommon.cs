@@ -27,7 +27,7 @@ namespace Authentication.Utilities
             var fromEmail = new MailAddress("thang.ndu.63cntt@ntu.edu.vn", "MrKatsu");
             var toEmail = new MailAddress(users.Email);
 
-            var fromEmailPassword = "Thangkatsu@2104";
+            var fromEmailPassword = "*****";
             var smtp = new SmtpClient
             {
                 Host = "smtp.gmail.com",

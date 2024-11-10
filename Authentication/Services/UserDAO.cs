@@ -66,12 +66,16 @@ namespace Authentication.Services
 
             return model.Id;
         }
-        public async Task VerifyEmail(Users users)
+        public async Task<bool> VerifyEmail(Users users)
         {
-            users.IsVerifedEmail = true;
+            if (!users.IsVerifedEmail)
+            {
+                users.IsVerifedEmail = true;
 
-            db.Entry(users).State = EntityState.Modified;
-            await db.SaveChangesAsync().ConfigureAwait(false);
+                db.Entry(users).State = EntityState.Modified;
+                await db.SaveChangesAsync().ConfigureAwait(false);
+            }
+            return false;
         }
         #region[Check]
         public async Task<bool> IsExistingAccount(string username)
