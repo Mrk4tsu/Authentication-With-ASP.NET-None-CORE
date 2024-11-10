@@ -4,6 +4,7 @@ using Authentication.Services;
 using Authentication.Utilities;
 using Authentication.ViewModels;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -85,18 +86,15 @@ namespace Authentication.Controllers
                 {
                     case 1:
                         //Nếu người dùng tick ghi nhớ đăng nhập thì sẽ lưu cookies 30 ngày, ngx lại là 3 phút
-                        var expirationTIme = model.RememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddMinutes(3);
-                        var authTicket = new FormsAuthenticationTicket(
-                                version: 1,
-                                name: model.Username,
-                                issueDate: DateTime.Now,
-                                expiration: expirationTIme,
-                                isPersistent: model.RememberMe,
-                                userData: model.Username
-                            );
-                        string enCryptedTicket = FormsAuthentication.Encrypt(authTicket);
-                        var authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, enCryptedTicket);
-                        Response.Cookies.Add(authCookie);
+                        int expirationTime = model.RememberMe ? (int)(DateTime.Now.AddDays(30) - DateTime.Now).TotalMinutes : (int)(DateTime.Now.AddMinutes(3) - DateTime.Now).TotalMinutes;
+
+                        var ticket = new FormsAuthenticationTicket(model.Username, model.RememberMe, expirationTime);
+                        string encrypted = FormsAuthentication.Encrypt(ticket);
+                        var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encrypted);
+                        cookie.Expires = DateTime.Now.AddMinutes(expirationTime);
+                        //Đặt HttpOnly = true ngăn cookie được truy cập bởi mã JavaScript
+                        cookie.HttpOnly = true;
+                        Response.Cookies.Add(cookie);
 
                         return RedirectToAction("Index", "Home");
                     case -2:
@@ -123,8 +121,13 @@ namespace Authentication.Controllers
             var user = await userDAO.GetUserByCodeReadOnly(code);
             if (user != null)
             {
-                await userDAO.VerifyEmail(user);
-                status = true;
+                var result = await userDAO.VerifyEmail(user);
+                if (result)
+                {
+                    status = true;
+                }
+                else
+                    ViewBag.Message = "Yêu cầu đã được thực hiện!";
             }
             else
             {

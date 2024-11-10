@@ -2,6 +2,7 @@
     ViewBag.Title = "Home Page";
 }
 
+<h2>@Request.Cookies[FormsAuthentication.FormsCookieName].Value;</h2>
 <main>
     <section class="row" aria-labelledby="aspnetTitle">
         <h1 id="title">ASP.NET</h1>
@@ -31,3 +32,4 @@
         </section>
     </div>
 </main>
+<a href="@Url.Action("Logout", "Auths")">Đăng xuất</a>
