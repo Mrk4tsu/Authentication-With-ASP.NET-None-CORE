@@ -99,17 +99,26 @@ namespace Authentication.Services
                 .OrderByDescending(dv => dv.CreateTime)
                 .FirstOrDefaultAsync(dv => dv.UserId == userId && dv.Status == true);
 
-            var user = await GetUsersAsync(userId);
+            
 
             if (deviceVerification != null && DateTime.UtcNow <= deviceVerification.ExpiredTime)
             {
                 // Kiểm tra Token và thời hạn
                 if (deviceVerification.Token == inputToken)
                 {
-                    
-
                     deviceVerification.Status = false; // Đánh dấu Token đã sử dụng
                     db.Entry(deviceVerification).State = EntityState.Modified;
+
+                    // Truy vấn UserDevice dựa trên UserId và DeviceName hoặc IpAddress
+                    var u = await db.UserDevice
+                        .FirstOrDefaultAsync(ud => ud.UserId == userId && ud.DeviceName == userDevice.DeviceName && ud.IpAddress == userDevice.IpAddress);
+
+                    if (u != null)
+                    {
+                        u.IsTrusted = true; // Đặt IsTrusted thành true
+                        db.Entry(u).State = EntityState.Modified;
+                    }
+
                     await db.SaveChangesAsync().ConfigureAwait(false);
                     return true; // Token hợp lệ
                 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -13,41 +14,54 @@ namespace Authentication.Services
 {
     public class UserDeviceDAO : BaseDAO
     {
+        public string IpAddress { get; set; }
+        public string DeviceName { get; set; }
         private DeviceVerificationTokenDAO tokenDAO = new DeviceVerificationTokenDAO();
         private AuthsDbContext db = null;
+        
         public UserDeviceDAO()
         {
             db = new AuthsDbContext();
+            this.DeviceName = GetDeviceName();
+            this.IpAddress = GetPublicIP();
         }
         public async Task<UserDevice> GetDeviceAsync(int deviceId)
         {
             var model = await db.UserDevice.AsNoTracking().Include(u => u.Users).SingleOrDefaultAsync(ud => ud.Id == deviceId);
             return model;
         }
+        public async Task<UserDevice> GetExistedDeviceAsync(int userId, string deviceName, string ipAddress)
+        {
+            var existedDevice = await db.UserDevice.FirstOrDefaultAsync(u => u.UserId == userId && u.IpAddress == ipAddress && u.DeviceName == deviceName);
+            return existedDevice;
+        }
         public async Task<bool> SaveUserDeviceAsync(Users user)
         {
-            string ipAddress = await GetPublicIPAsync();
-            string deviceName = GetDeviceName();
-
             var eC = EmailCommon.GetInstance();
             //Gửi OTP                  
             string OTP = await tokenDAO.GenerationOTP(user);
             string subject = "Xác thực thiết bị";
-            string body = $"Phát hiện lượt đăng nhập lạ tại: {ipAddress}. Mã OTP xác thực lượt đăng nhập của bạn là: {OTP}";           
+            string body = $"Phát hiện lượt đăng nhập lạ tại: {this.IpAddress}. Mã OTP xác thực lượt đăng nhập của bạn là: {OTP}";           
 
             
             //Đã login thiết bị từ trước đó hay chưa
-            var existedDevice = await db.UserDevice.FirstOrDefaultAsync(u => u.UserId == user.Id && u.IpAddress == ipAddress);
+            var existedDevice = await GetExistedDeviceAsync(user.Id, this.DeviceName, this.IpAddress);
             if (existedDevice != null)
             {
                 if (existedDevice.IsTrusted)
                 {
                     existedDevice.LastLogin = DateTime.UtcNow;
                     db.Entry(existedDevice).State = EntityState.Modified;
+                    await db.SaveChangesAsync().ConfigureAwait(false); // Lưu các thay đổi vào cơ sở dữ liệu
+
                     return true; //Đã xác thực thiết bị
                 }
                 else
                 {
+                    existedDevice.LastLogin = DateTime.UtcNow;
+                    db.Entry(existedDevice).State = EntityState.Modified;
+                    await db.SaveChangesAsync().ConfigureAwait(false); // Lưu các thay đổi vào cơ sở dữ liệu
+
                     await eC.SendEmail(user, subject, body);
                     return false;//Chưa xác thực
                 }
@@ -57,8 +71,8 @@ namespace Authentication.Services
                 var newUserDevice = new UserDevice
                 {
                     UserId = user.Id,
-                    DeviceName = deviceName,
-                    IpAddress = ipAddress,
+                    DeviceName = this.DeviceName,
+                    IpAddress = this.IpAddress,
                     FistLogin = DateTime.UtcNow,
                     LastLogin = DateTime.UtcNow,
                     IsTrusted = false
@@ -70,26 +84,26 @@ namespace Authentication.Services
                 return false;// Lần đàu đăng nhập
             }
         }
-        public async Task<string> GetPublicIPAsync()
+        public string GetPublicIP()
         {
             using (HttpClient client = new HttpClient())
             {
                 try
                 {
                     // Gọi API để lấy địa chỉ IP công khai
-                    HttpResponseMessage response = await client.GetAsync("https://api.ipify.org");
+                    HttpResponseMessage response = client.GetAsync("https://api.ipify.org").Result;
                     response.EnsureSuccessStatusCode();
 
-                    string ipAddress = await response.Content.ReadAsStringAsync();
+                    string ipAddress = response.Content.ReadAsStringAsync().Result;
                     return ipAddress;
                 }
                 catch
-                {                   
+                {
                     return null;
                 }
             }
         }
-        private string GetDeviceName()
+        public string GetDeviceName()
         {
             HttpBrowserCapabilities capability = HttpContext.Current.Request.Browser;
             if (capability.IsMobileDevice)

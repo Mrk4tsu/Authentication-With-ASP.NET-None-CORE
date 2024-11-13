@@ -136,6 +136,7 @@
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\DeviceVerificationTokensController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\UserDevicesController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -225,6 +226,11 @@
     <Content Include="Views\DeviceVerificationTokens\Edit.cshtml" />
     <Content Include="Views\DeviceVerificationTokens\Index.cshtml" />
     <Content Include="Views\Auths\ActiveDevice.cshtml" />
+    <Content Include="Views\UserDevices\Create.cshtml" />
+    <Content Include="Views\UserDevices\Delete.cshtml" />
+    <Content Include="Views\UserDevices\Details.cshtml" />
+    <Content Include="Views\UserDevices\Edit.cshtml" />
+    <Content Include="Views\UserDevices\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Base\" />
