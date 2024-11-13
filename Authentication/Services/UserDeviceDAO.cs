@@ -80,7 +80,7 @@ namespace Authentication.Services
                 db.UserDevice.Add(newUserDevice);
                 await db.SaveChangesAsync().ConfigureAwait(false);
 
-                await eC.SendEmail(user, subject, body);
+                //await eC.SendEmail(user, subject, body); Tạm thời tắt không gửi mail, xem tạm qua database
                 return false;// Lần đàu đăng nhập
             }
         }

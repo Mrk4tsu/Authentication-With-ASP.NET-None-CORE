@@ -4,32 +4,47 @@
     ViewBag.Title = "ActiveDevice";
 }
 
+@*@using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <h4>DeviceActiveViewModel</h4>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(m => m.Username)
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.OTP, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.OTP, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.OTP, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Submit" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    }*@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-
-    <div class="form-horizontal">
-        <h4>DeviceActiveViewModel</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(m => m.Username)
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.OTP, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
+    @Html.HiddenFor(m => m.Username)
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card p-4 shadow-sm" style="width: 400px;">
+            <h4 class="text-center mb-4">Nhập mã OTP</h4>
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <p class="text-muted text-center">Vui lòng nhập mã OTP gồm 6 chữ số đã được gửi đến số điện thoại của bạn</p>
+            <div class="d-flex justify-content-center mb-3">
                 @Html.EditorFor(model => model.OTP, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.OTP, "", new { @class = "text-danger" })
             </div>
-        </div>
+            <div class="d-flex justify-content-center mb-3">
+                <input type="submit" value="Submit" class="btn btn-primary w-100" />
+            </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Submit" class="btn btn-default" />
-            </div>
         </div>
     </div>
 }
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
