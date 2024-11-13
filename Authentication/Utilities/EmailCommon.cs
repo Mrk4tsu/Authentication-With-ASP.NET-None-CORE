@@ -27,7 +27,7 @@ namespace Authentication.Utilities
             var fromEmail = new MailAddress("thang.ndu.63cntt@ntu.edu.vn", "MrKatsu");
             var toEmail = new MailAddress(users.Email);
 
-            var fromEmailPassword = "*****";
+            var fromEmailPassword = "******";
             var smtp = new SmtpClient
             {
                 Host = "smtp.gmail.com",
@@ -53,7 +53,7 @@ namespace Authentication.Utilities
             string html = $@"<div style=""display:flex; justify-content:center"">
                                 <div style=""width: fit-content; border-radius:15px; font-family: 'Montserrat Medium', sans-serif; background: rgba(39, 61, 82); text-align: center; padding: 10px 40px; "">
                                     <div style="" margin: 20px 0px;"">
-                                        <img style=""width: 250px;"" src='{logoUrl}' />
+                                        <a href='https://github.com/Mrk4tsu'><img style=""width: 250px;"" src='{logoUrl}' /></a>
                                         <p style=""font-size: 30px; color: #fff;"">Chào mừng đến với <span style=""color: #28a745; font-weight: bold;"">MrKatsu</span></p>                                     
                                         <p style=""font-size: 16px; color: #fff;"">Xin chào {user}, đây là thư dùng 1 lần để thực hiện xác minh tài khoản. Vui lòng lưu trữ mã xác thực người dùng, mọi quyền sử dụng tài khoản sẽ phụ thuộc vào <b>MÃ XÁC THỰC NGƯỜI DÙNG</b> này.</p>
                                         <p style=""font-size: 30px; color: #fff;"">Mã xác thực người dùng: </p>

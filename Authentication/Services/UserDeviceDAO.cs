@@ -13,6 +13,7 @@ namespace Authentication.Services
 {
     public class UserDeviceDAO : BaseDAO
     {
+        private DeviceVerificationTokenDAO tokenDAO = new DeviceVerificationTokenDAO();
         private AuthsDbContext db = null;
         public UserDeviceDAO()
         {
@@ -23,12 +24,18 @@ namespace Authentication.Services
             var model = await db.UserDevice.AsNoTracking().Include(u => u.Users).SingleOrDefaultAsync(ud => ud.Id == deviceId);
             return model;
         }
-        public async Task SaveUserDeviceAsync(Users user)
+        public async Task<bool> SaveUserDeviceAsync(Users user)
         {
-            var eC = EmailCommon.GetInstance();
-
             string ipAddress = await GetPublicIPAsync();
             string deviceName = GetDeviceName();
+
+            var eC = EmailCommon.GetInstance();
+            //Gửi OTP                  
+            string OTP = await tokenDAO.GenerationOTP(user);
+            string subject = "Xác thực thiết bị";
+            string body = $"Phát hiện lượt đăng nhập lạ tại: {ipAddress}. Mã OTP xác thực lượt đăng nhập của bạn là: {OTP}";           
+
+            
             //Đã login thiết bị từ trước đó hay chưa
             var existedDevice = await db.UserDevice.FirstOrDefaultAsync(u => u.UserId == user.Id && u.IpAddress == ipAddress);
             if (existedDevice != null)
@@ -37,13 +44,12 @@ namespace Authentication.Services
                 {
                     existedDevice.LastLogin = DateTime.UtcNow;
                     db.Entry(existedDevice).State = EntityState.Modified;
+                    return true; //Đã xác thực thiết bị
                 }
                 else
                 {
-                    //Gửi OTP
-                    //string subject = "Xác thực thiết bị";
-                    //string body = "Mã OTP của bạn là: " + RandomNumber(6);
-                    //await eC.SendEmail(user, subject, body);
+                    await eC.SendEmail(user, subject, body);
+                    return false;//Chưa xác thực
                 }
             }
             else
@@ -59,6 +65,9 @@ namespace Authentication.Services
                 };
                 db.UserDevice.Add(newUserDevice);
                 await db.SaveChangesAsync().ConfigureAwait(false);
+
+                await eC.SendEmail(user, subject, body);
+                return false;// Lần đàu đăng nhập
             }
         }
         public async Task<string> GetPublicIPAsync()

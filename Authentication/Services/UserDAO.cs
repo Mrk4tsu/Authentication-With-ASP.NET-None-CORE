@@ -52,8 +52,12 @@ namespace Authentication.Services
                     return -3;//Mật khẩu không chính xác
                 else
                 {
-                    await userDevice.SaveUserDeviceAsync(user);
-                    return 1;
+                    bool active = await userDevice.SaveUserDeviceAsync(user);
+                    if (active)
+                    {
+                        return 1;
+                    }
+                    return -4;
                 }
             }
             //Không có tài khoản trong databse

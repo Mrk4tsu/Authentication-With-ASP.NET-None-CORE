@@ -105,6 +105,8 @@ namespace Authentication.Controllers
                         ModelState.AddModelError("", "Mật khẩu không chính xác");
                         message = "Mật khẩu không chính xác";
                         break;
+                    case -4:
+                        return RedirectToAction("ActiveDevice", "Auths");
                     default:
                         ModelState.AddModelError("", "Tài khoản không tồn tại");
                         message = "Tài khoản không tồn tại";
@@ -115,6 +117,16 @@ namespace Authentication.Controllers
             return View(model);
         }
         #endregion
+        [HttpGet]
+        public ActionResult ActiveDevice()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult ActiveDevice(string input)
+        {
+            return View(input);
+        }
         public async Task<ActionResult> VerifyEmail(string code)
         {
             bool status = false;

@@ -8,7 +8,7 @@
 	CreatedDate DATETIME NOT NULL,
 	ModifiedDate DATETIME NOT NULL,
 	UserCODE VARCHAR(20) NOT NULL,
-	Status BIT NOT NULL
+	Status BIT NOT NULL,
 	IsVerifedEmail BIT NOT NULL
 );
 CREATE TABLE UserDevice(
