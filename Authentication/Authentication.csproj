@@ -152,6 +152,7 @@
     <Compile Include="Utilities\EmailCommon.cs" />
     <Compile Include="Utilities\SimpleHash.cs" />
     <Compile Include="Services\UserDeviceDAO.cs" />
+    <Compile Include="ViewModels\DeviceActiveViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
   </ItemGroup>
@@ -218,12 +219,12 @@
     <Content Include="Views\Users\Details.cshtml" />
     <Content Include="Views\Users\Edit.cshtml" />
     <Content Include="Views\Users\Index.cshtml" />
-    <Content Include="Views\Auths\ActiveDevice.cshtml" />
     <Content Include="Views\DeviceVerificationTokens\Create.cshtml" />
     <Content Include="Views\DeviceVerificationTokens\Delete.cshtml" />
     <Content Include="Views\DeviceVerificationTokens\Details.cshtml" />
     <Content Include="Views\DeviceVerificationTokens\Edit.cshtml" />
     <Content Include="Views\DeviceVerificationTokens\Index.cshtml" />
+    <Content Include="Views\Auths\ActiveDevice.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Base\" />

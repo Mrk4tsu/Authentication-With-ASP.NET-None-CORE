@@ -106,6 +106,8 @@ namespace Authentication.Controllers
                         message = "Mật khẩu không chính xác";
                         break;
                     case -4:
+                        TempData["Username"] = model.Username;
+                        TempData["RememberMe"] = model.RememberMe;
                         return RedirectToAction("ActiveDevice", "Auths");
                     default:
                         ModelState.AddModelError("", "Tài khoản không tồn tại");
@@ -120,12 +122,47 @@ namespace Authentication.Controllers
         [HttpGet]
         public ActionResult ActiveDevice()
         {
-            return View();
+            if (TempData["Username"] == null || TempData["RememberMe"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var model = new DeviceActiveViewModel
+            {
+                Username = TempData["Username"].ToString()
+            };
+
+            TempData.Keep("RememberMe"); // Keep RememberMe in TempData for the POST action
+
+            return View(model);
         }
         [HttpPost]
-        public ActionResult ActiveDevice(string input)
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ActiveDevice(DeviceActiveViewModel model)
         {
-            return View(input);
+            var user = userDAO.GetUserReadOnly(model.Username);
+            var isOtpValid = await userDAO.VerifyToken(user.Id, model.OTP);
+            if (isOtpValid)
+            {
+                // Lấy RememberMe từ TempData
+                bool rememberMe = (bool)TempData["RememberMe"];
+                // Nếu OTP hợp lệ, thêm cookies như trong phương thức Login
+                int expirationTime = rememberMe ? (int)(DateTime.Now.AddDays(30) - DateTime.Now).TotalMinutes : (int)(DateTime.Now.AddMinutes(3) - DateTime.Now).TotalMinutes;
+                
+                var ticket = new FormsAuthenticationTicket(model.Username, rememberMe, expirationTime);
+                string encrypted = FormsAuthentication.Encrypt(ticket);
+                var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encrypted);
+                cookie.Expires = DateTime.Now.AddMinutes(expirationTime);
+                cookie.HttpOnly = true;
+                Response.Cookies.Add(cookie);
+
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                ModelState.AddModelError("", "OTP không hợp lệ.");
+            }
+            return View(model);
         }
         public async Task<ActionResult> VerifyEmail(string code)
         {

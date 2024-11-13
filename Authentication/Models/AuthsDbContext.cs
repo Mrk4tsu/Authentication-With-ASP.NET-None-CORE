@@ -72,5 +72,7 @@ namespace Authentication.Models
                 .WithRequired(e => e.Users)
                 .HasForeignKey(e => e.UserId);
         }
+
+        public System.Data.Entity.DbSet<Authentication.ViewModels.DeviceActiveViewModel> DeviceActiveViewModels { get; set; }
     }
 }

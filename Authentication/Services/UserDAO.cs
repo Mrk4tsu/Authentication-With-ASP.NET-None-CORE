@@ -32,7 +32,7 @@ namespace Authentication.Services
         }
         public async Task<List<Users>> GetListUsersAsync()
         {
-           var model = await db.Users.AsNoTracking().ToListAsync();
+            var model = await db.Users.AsNoTracking().ToListAsync();
             return model;
         }
         public async Task<Users> GetUsersAsync(int id)
@@ -92,6 +92,32 @@ namespace Authentication.Services
                 await db.SaveChangesAsync().ConfigureAwait(false);
             }
             return false;
+        }
+        public async Task<bool> VerifyToken(int userId, string inputToken)
+        {
+            var deviceVerification = await db.DeviceVerificationToken
+                .OrderByDescending(dv => dv.CreateTime)
+                .FirstOrDefaultAsync(dv => dv.UserId == userId && dv.Status == true);
+
+            var user = await GetUsersAsync(userId);
+
+            if (deviceVerification != null && DateTime.UtcNow <= deviceVerification.ExpiredTime)
+            {
+                // Kiểm tra Token và thời hạn
+                if (deviceVerification.Token == inputToken)
+                {
+                    
+
+                    deviceVerification.Status = false; // Đánh dấu Token đã sử dụng
+                    db.Entry(deviceVerification).State = EntityState.Modified;
+                    await db.SaveChangesAsync().ConfigureAwait(false);
+                    return true; // Token hợp lệ
+                }
+                else
+                    return false; // Token không hợp lệ
+            }
+
+            return false; // Token không hợp lệ hoặc đã hết hạn
         }
         #region[Check]
         public async Task<bool> IsExistingAccount(string username)
