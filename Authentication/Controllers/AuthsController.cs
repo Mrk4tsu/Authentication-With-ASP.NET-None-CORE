@@ -76,12 +76,12 @@ namespace Authentication.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Login(LoginViewModel model)
+        public async Task<ActionResult> Login(LoginViewModel model)
         {
             string message = "";
             if (ModelState.IsValid)
             {
-                var result = userDAO.Login(model.Username, model.Password, model.RememberMe);
+                var result = await userDAO.Login(model.Username, model.Password, model.RememberMe);
                 switch (result)
                 {
                     case 1:
@@ -105,6 +105,10 @@ namespace Authentication.Controllers
                         ModelState.AddModelError("", "Mật khẩu không chính xác");
                         message = "Mật khẩu không chính xác";
                         break;
+                    case -4:
+                        TempData["Username"] = model.Username;
+                        TempData["RememberMe"] = model.RememberMe;
+                        return RedirectToAction("ActiveDevice", "Auths");
                     default:
                         ModelState.AddModelError("", "Tài khoản không tồn tại");
                         message = "Tài khoản không tồn tại";
@@ -115,6 +119,51 @@ namespace Authentication.Controllers
             return View(model);
         }
         #endregion
+        [HttpGet]
+        public ActionResult ActiveDevice()
+        {
+            if (TempData["Username"] == null || TempData["RememberMe"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var model = new DeviceActiveViewModel
+            {
+                Username = TempData["Username"].ToString()
+            };
+
+            TempData.Keep("RememberMe"); // Keep RememberMe in TempData for the POST action
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ActiveDevice(DeviceActiveViewModel model)
+        {
+            var user = userDAO.GetUserReadOnly(model.Username);
+            var isOtpValid = await userDAO.VerifyToken(user.Id, model.OTP);
+            if (isOtpValid)
+            {
+                // Lấy RememberMe từ TempData
+                bool rememberMe = (bool)TempData["RememberMe"];
+                // Nếu OTP hợp lệ, thêm cookies như trong phương thức Login
+                int expirationTime = rememberMe ? (int)(DateTime.Now.AddDays(30) - DateTime.Now).TotalMinutes : (int)(DateTime.Now.AddMinutes(3) - DateTime.Now).TotalMinutes;
+                
+                var ticket = new FormsAuthenticationTicket(model.Username, rememberMe, expirationTime);
+                string encrypted = FormsAuthentication.Encrypt(ticket);
+                var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encrypted);
+                cookie.Expires = DateTime.Now.AddMinutes(expirationTime);
+                cookie.HttpOnly = true;
+                Response.Cookies.Add(cookie);
+
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                ModelState.AddModelError("", "OTP không hợp lệ.");
+            }
+            return View(model);
+        }
         public async Task<ActionResult> VerifyEmail(string code)
         {
             bool status = false;

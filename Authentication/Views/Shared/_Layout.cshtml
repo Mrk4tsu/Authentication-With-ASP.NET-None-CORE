@@ -23,13 +23,17 @@
                     <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
                 </ul>
                 @{
-                    
+
                     if (Request.IsAuthenticated)
                     {
                         var user = new Authentication.Services.UserDAO().GetUserReadOnly(User.Identity.Name);
                         <ul class="navbar-nav">
-                            <li class="text-white">@user.Username</li>
-                            <li class="text-white">Đăng xuất</li>
+                            <li class="nav-item">
+                                <span class="nav-link text-white">@user.Username</span>
+                            </li>
+                            <li class="nav-item">
+                                @Html.ActionLink("Logout", "Logout", "Auths", new { area = "" }, new { @class = "nav-link text-white" })
+                            </li>
                         </ul>
                     }
                     else
