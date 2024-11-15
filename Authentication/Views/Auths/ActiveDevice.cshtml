@@ -37,7 +37,7 @@
         <div class="card p-4 shadow-sm" style="width: 400px;">
             <h4 class="text-center mb-4">Nhập mã OTP</h4>
             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-            <p class="text-muted text-center">Vui lòng nhập mã OTP gồm 6 chữ số đã được gửi đến số điện thoại của bạn</p>
+            <p class="text-muted text-center">Vui lòng nhập mã OTP gồm 6 chữ số đã được gửi đến email của bạn</p>
             <div class="d-flex justify-content-center mb-3">
                 @Html.EditorFor(model => model.OTP, new { htmlAttributes = new { @class = "form-control" } })
             </div>

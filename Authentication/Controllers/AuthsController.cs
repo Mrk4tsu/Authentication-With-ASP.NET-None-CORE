@@ -7,6 +7,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -106,8 +107,11 @@ namespace Authentication.Controllers
                         message = "Mật khẩu không chính xác";
                         break;
                     case -4:
-                        TempData["Username"] = model.Username;
-                        TempData["RememberMe"] = model.RememberMe;
+                        var userSession = new DeviceActiveViewModel();
+                        userSession.Username = model.Username;
+                        userSession.RememberMe = model.RememberMe;
+                        Session.Add(StringHelper.USER_SESSION, userSession);
+
                         return RedirectToAction("ActiveDevice", "Auths");
                     default:
                         ModelState.AddModelError("", "Tài khoản không tồn tại");
@@ -119,42 +123,42 @@ namespace Authentication.Controllers
             return View(model);
         }
         #endregion
+        #region[Kích hoạt]
         [HttpGet]
         public ActionResult ActiveDevice()
         {
-            if (TempData["Username"] == null || TempData["RememberMe"] == null)
+            var session = (DeviceActiveViewModel)Session[StringHelper.USER_SESSION];
+            if (session == null)
             {
                 return RedirectToAction("Login");
             }
-
-            var model = new DeviceActiveViewModel
-            {
-                Username = TempData["Username"].ToString()
-            };
-
-            TempData.Keep("RememberMe"); // Keep RememberMe in TempData for the POST action
-
-            return View(model);
+            return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ActiveDevice(DeviceActiveViewModel model)
         {
+            var session = (DeviceActiveViewModel)Session[StringHelper.USER_SESSION];
+            model.Username = session.Username;
             var user = userDAO.GetUserReadOnly(model.Username);
+
+
             var isOtpValid = await userDAO.VerifyToken(user.Id, model.OTP);
             if (isOtpValid)
             {
                 // Lấy RememberMe từ TempData
-                bool rememberMe = (bool)TempData["RememberMe"];
+                bool rememberMe = session.RememberMe;
                 // Nếu OTP hợp lệ, thêm cookies như trong phương thức Login
                 int expirationTime = rememberMe ? (int)(DateTime.Now.AddDays(30) - DateTime.Now).TotalMinutes : (int)(DateTime.Now.AddMinutes(3) - DateTime.Now).TotalMinutes;
-                
+
                 var ticket = new FormsAuthenticationTicket(model.Username, rememberMe, expirationTime);
                 string encrypted = FormsAuthentication.Encrypt(ticket);
                 var cookie = new HttpCookie(FormsAuthentication.FormsCookieName, encrypted);
                 cookie.Expires = DateTime.Now.AddMinutes(expirationTime);
                 cookie.HttpOnly = true;
                 Response.Cookies.Add(cookie);
+
+                Session.Clear();
 
                 return RedirectToAction("Index", "Home");
             }
@@ -185,6 +189,64 @@ namespace Authentication.Controllers
 
             ViewBag.Status = status;
             return View();
+        }
+        #endregion
+        [HttpGet]
+        public ActionResult ForgotPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<ActionResult> ForgotPassword(string emailID)
+        {
+            string message = "";
+            bool status = false;
+            var result = await userDAO.RequestResetCode(emailID);
+            if (result)
+            {
+                message = "Reset password link has been sent to your email id.";
+            }
+            else
+            {
+                message = "Account not found";
+            }
+            ViewBag.Message = message;
+            return View();
+        }
+        [HttpGet]
+        public async Task<ActionResult> ResetPassword(string id)
+        {
+            var model = await userDAO.GetResetPasswordModelAsync(id);
+            if (model != null)
+            {
+                return View(model);
+            }
+            else
+            {
+                return HttpNotFound();
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> ResetPassword(ResetPasswordModel model)
+        {
+            var message = "";
+            if (ModelState.IsValid)
+            {
+                var result = await userDAO.ConfirmResetPassword(model);
+                if (result)
+                {
+                    message = "Mật khẩu đã thay đổi thành công";
+                    
+                }
+                else
+                {
+                    message = "Something invalid";
+                }
+            }
+
+            ViewBag.Message = message;
+            return View(model);
         }
         public ActionResult Logout()
         {

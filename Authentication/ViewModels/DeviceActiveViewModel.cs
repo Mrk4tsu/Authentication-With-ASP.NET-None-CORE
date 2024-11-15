@@ -10,6 +10,7 @@ namespace Authentication.ViewModels
     {
         [Key]
         public string Username { get; set; }
+        public bool RememberMe { get; set; }
         public string OTP { get; set; }
     }
 }
