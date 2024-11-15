@@ -1,5 +1,7 @@
 # XỬ LÝ ĐĂNG NHẬP, ĐĂNG KÝ CHO TÀI KHOẢN KÈM THEO XÁC THỰC NGƯỜI DÙNG
 
+> ### Đây chỉ là dự án tìm hiểu và phát triển chưa hoàn thiện, sẽ còn cải tiến về sau này. Vui lòng tham khảo, tránh sử dụng hoàn toàn trong dự án thực tế
+
 ## 💡 Ý tưởng dự án
 Dự án này được xây dựng nhằm tìm hiểu cơ bản về xử lý bảo mật, xác thực người dùng trước khi truy cập trang web:
 - Xác thực mail khi đăng ký (✔️)
@@ -68,5 +70,5 @@ Sau khi ấn tạo, 1 hộp thoại hiển thị 1 đoạn mã, đây là đoạ
    `
      Install-Package MailKit
    `
-# Đây chỉ là dự án tìm hiểu và phát triển chưa hoàn thiện, sẽ còn cải tiến về sau này. Vui lòng tham khảo, tránh sử dụng hoàn toàn trong dự án thực tế
+
 
