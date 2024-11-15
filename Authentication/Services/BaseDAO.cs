@@ -17,7 +17,14 @@ namespace Authentication.Services
             string result = $"{RandomString(2)}{ticks}";
             return result;
         }
-        private string RandomString(int length)
+        protected string TickString()
+        {
+            long ticks = DateTime.Now.Ticks;
+            string code = ticks.ToString().Substring(ticks.ToString().Length - 6);
+
+            return code;
+        }
+        protected string RandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             Random random = new Random();

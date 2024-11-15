@@ -74,5 +74,7 @@ namespace Authentication.Models
         }
 
         public System.Data.Entity.DbSet<Authentication.ViewModels.DeviceActiveViewModel> DeviceActiveViewModels { get; set; }
+
+        public System.Data.Entity.DbSet<Authentication.ViewModels.ResetPasswordModel> ResetPasswordModels { get; set; }
     }
 }

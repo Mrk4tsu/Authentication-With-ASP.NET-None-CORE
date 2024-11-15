@@ -1,13 +1,8 @@
 ﻿using Authentication.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Security.Principal;
+using MailKit.Net.Smtp;
+using MimeKit;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Helpers;
+
 
 namespace Authentication.Utilities
 {
@@ -24,29 +19,30 @@ namespace Authentication.Utilities
         }
         public async Task SendEmail(Users users, string subject, string body)
         {
-            var fromEmail = new MailAddress("thang.ndu.63cntt@ntu.edu.vn", "MrKatsu");
-            var toEmail = new MailAddress(users.Email);
+            var email = new MimeMessage();
+            var fromAddress = new MailboxAddress("Mrkatsu", "yourmail@gmail.com");
+            var toAddress = new MailboxAddress(users.FullName, users.Email);
+            email.From.Add(fromAddress);
+            email.To.Add(toAddress);
 
-            var fromEmailPassword = "******";
-            var smtp = new SmtpClient
+            email.Subject = subject;
+            email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
             {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromEmail.Address, fromEmailPassword)
+                Text = body
             };
-            using (var message = new MailMessage(fromEmail, toEmail)
+            using (var smtp = new SmtpClient())
             {
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            })
-            {
-                await smtp.SendMailAsync(message);
+                await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+
+                // Note: Mật khẩu ứng dụng là mật khẩu thay thế sử dụng mật khẩu chính của Gmail
+                // (Không thể sử dụng mật khẩu chính thức của Gmail)
+                await smtp.AuthenticateAsync("yourmail@gmail.com", "Mật khẩu ứng dụng");
+
+                await smtp.SendAsync(email);
+                smtp.Disconnect(true);
             }
         }
+       
         public string BodyWelcomeEmail(string url, string code, string user)
         {
             string logoUrl = "https://raw.githubusercontent.com/Mrk4tsu/Mrk4tsu/refs/heads/main/assets/MRKATSU.png";

@@ -1,5 +1,6 @@
 ﻿using Authentication.Models;
 using Authentication.Utilities;
+using Authentication.ViewModels;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,12 +8,15 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Helpers;
+using System.Web.Services.Description;
 
 namespace Authentication.Services
 {
     public class UserDAO : BaseDAO
     {
         private SimpleHash simpleHash = SimpleHash.GetInstance();
+        private EmailCommon emailCommon = EmailCommon.GetInstance();
         private UserDeviceDAO userDevice = new UserDeviceDAO();
         private AuthsDbContext db;
         public UserDAO()
@@ -128,6 +132,58 @@ namespace Authentication.Services
 
             return false; // Token không hợp lệ hoặc đã hết hạn
         }
+        public async Task<bool> RequestResetCode(string email)
+        {
+            var account = await db.Users.Where(a => a.Email == email).FirstOrDefaultAsync();
+            if (account != null)
+            {
+                string resetCode = Guid.NewGuid().ToString();
+
+                var verifyUrl = "/Auths/ResetPassword/" + resetCode;
+                var link = HttpContext.Current.Request.Url.AbsoluteUri.Replace(HttpContext.Current.Request.Url.PathAndQuery, verifyUrl);
+                string body = "Hi,<br/>br/>We got request for reset your account password. Please click on the below link to reset your password" +
+    "<br/><br/><a href=" + link + ">Reset Password link</a>";
+                await emailCommon.SendEmail(account, "Reset Password", body);
+                account.CodeResetPassword = resetCode;
+
+                db.Configuration.ValidateOnSaveEnabled = false;
+                await db.SaveChangesAsync();
+
+                return true;
+            }
+            return false;
+        }
+        public async Task<ResetPasswordModel> GetResetPasswordModelAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
+
+            var user = await db.Users.AsNoTracking().Where(a => a.CodeResetPassword == id).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                ResetPasswordModel model = new ResetPasswordModel
+                {
+                    ResetCode = id
+                };
+                return model;
+            }
+            return null;
+        }
+        public async Task<bool> ConfirmResetPassword(ResetPasswordModel model)
+        {
+            var user = await db.Users.Where(a => a.CodeResetPassword == model.ResetCode).FirstOrDefaultAsync();
+            if (user != null)
+            {
+                user.Password = simpleHash.Hash(model.NewPassword);
+                user.CodeResetPassword = "";
+                db.Configuration.ValidateOnSaveEnabled = false;
+                await db.SaveChangesAsync().ConfigureAwait(false);
+                return true;
+            }
+            return false;
+        }
         #region[Check]
         public async Task<bool> IsExistingAccount(string username)
         {
@@ -144,6 +200,12 @@ namespace Authentication.Services
                 .Where(a => a.Email == mail)
                 //.Select(a => a.Id)
                 .AnyAsync();
+        }
+
+        internal object GetUserByEmail(string emailID)
+        {
+            var account = db.Users.Where(a => a.Email == emailID).FirstOrDefault();
+            return account;
         }
         #endregion
     }

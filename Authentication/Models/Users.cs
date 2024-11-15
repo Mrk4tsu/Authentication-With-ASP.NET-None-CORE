@@ -1,4 +1,4 @@
-namespace Authentication.Models
+﻿namespace Authentication.Models
 {
     using System;
     using System.Collections.Generic;
@@ -45,6 +45,10 @@ namespace Authentication.Models
         [Required]
         [StringLength(20)]
         public string UserCODE { get; set; }
+
+        [StringLength(50)]
+        public string CodeResetPassword { get; set; } // Thêm thuộc tính CodeResetPassword
+
 
         public bool Status { get; set; }
 
